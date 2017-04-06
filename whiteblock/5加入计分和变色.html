@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <style>
+			#main{
+				height: 400px;
+				width: 400px;
+				background: gray;
+				border: 2px solid green;
+				margin: 10px auto;
+				position: relative;
+				overflow: hidden;
+				background: white;
+				
+			}
+			#container{
+				height: 400px;
+				width: 100%;
+				position: relative;
+				top: -100px;
+				background: white;
+			}
+			.row{
+				width: 100%;
+				height: 100px;
+			}
+			.cell{
+				width: 100px;
+				height: 100px;
+				float: left;
+			}
+			.black{background:black;}
+			#score{text-align: center;}
+        </style>
+    </head>
+    <body>
+    <h1 id="score">0</h1>
+    <div id="main">
+    	<div id="container">
+    		
+    	</div>
+    </div>
+    </body>
+    <script>
+    //关注点：appendChild和insert before('content');
+   
+    var timer=null;
+    var state=0;//0初始化，1进行中，2认为暂停，3结束；做一个标记来指示当前的状态
+    //4初始化,是3行，不是4行，这是游戏中考虑到实际情况，刚点开始没来得及点呢就往下掉，失败退出
+    function init()
+    {
+    	for(var i=0;i<4;i++)
+    	{
+    		crow();
+    	}
+    	$('container').onclick=function(ev)
+    	{
+    		ev=event||ev;
+
+    		judge();
+    		
+    	}
+    }
+
+    function judge(ev)
+    {
+    	ev=event||ev;
+    	if(state==3){
+    		alert('失败者禁入');
+    		return;
+    	}
+    	if(ev.target.className.indexOf('black')==-1)
+    		{
+    			clearInterval(timer);
+    			state=3;
+    			alert('结束');
+    		}else{
+    			ev.target.className='cell';
+    			score();
+    		}
+    }
+
+    /**
+     *
+     * 6定时器，让它动起来，
+     */
+    function start()
+    {
+    	timer=window.setInterval('move()',30);
+    }
+     /** 
+     * 5动起来
+     */
+    function move()
+    {
+    	var con=$('container');
+    	var top=parseInt(window.getComputedStyle(con,null)['top']);
+    	top+=5;
+    	con.style.top=top+'px';
+    	if(top==0){
+    		crow();
+    		con.style.top=-100+'px';
+    		//每创建一个新行之后删掉旧行
+    		drop();
+    	}
+    }
+
+    //计分：点击触发一下计一分；找到h1的内容，加1再返回去
+    function score()
+    {
+    	$('score').innerHTML=parseInt($('score').innerHTML)+1;
+    }
+
+    //2 创建div.row; div.class='row';
+    function crow()
+    {
+    	var row=cdiv('row');
+    	var classes=createSn();
+
+
+    	for(var i=0;i<4;i++)
+    	{
+    		row.appendChild(cdiv(classes[i]));
+    	}
+
+    	var con=$('container');
+    	if(con.firstChild==null)
+    	{
+    		con.appendChild(row);
+    	}else{
+    		con.insertBefore(row, con.firstChild);
+    	}
+    	
+
+    }
+    /**
+     *
+     * 7专门负责删最后一行
+     */
+    function drop()
+    {
+    	var con=$('container');
+    	con.removeChild(con.lastChild);
+    }
+    //1 创建一个div,className是其类名
+    function cdiv(className)
+    {
+    	var div=document.createElement('div');
+    	div.className=className;
+    	return div;
+    }
+    
+    //3返回一个数组，随机其中一个单元，cell再多加一个类名使得其值为black,其余三个为cell
+    function createSn()
+    {
+    	var arr=['cell','cell','cell','cell'];
+    	var i=Math.floor(Math.random()*4);
+    	arr[i]='cell black';
+    	return arr;
+    }
+
+    //按id获取对象
+    function $(id){
+    	return document.getElementById(id);
+    }
+
+   init();
+  start();
+  
+    </script>
+</html>
